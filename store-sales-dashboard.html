@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Store Sales Dashboard</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+      theme: { extend: { fontFamily: { sans: ['"Trebuchet MS"', 'Verdana', 'system-ui', 'sans-serif'] } } }
+    };
+  </script>
+  <style>
+    :root {
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      color-scheme: light dark;
+    }
+
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px);
+    }
+
+    body {
+      background: #f3f5f2;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #12181a;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-sans text-slate-800 dark:text-slate-100 min-h-screen">
+
+  <!-- LOGIN VIEW -->
+  <main id="login-view" class="min-h-screen flex items-center justify-center p-4">
+    <form id="login-form"
+      class="w-full max-w-sm bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 sm:p-8 space-y-4 border border-slate-200 dark:border-slate-700"
+      novalidate>
+      <div>
+        <h1 class="text-2xl font-bold text-teal-700 dark:text-teal-300">Store Sales</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Sign in to see today’s orders.</p>
+      </div>
+      <div>
+        <label for="email" class="block text-sm font-medium mb-1">Email</label>
+        <input id="email" type="email" autocomplete="off"
+          class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+      </div>
+      <div>
+        <label for="password" class="block text-sm font-medium mb-1">Password</label>
+        <input id="password" type="password" autocomplete="off"
+          class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+      </div>
+      <p id="login-error" class="hidden text-sm text-red-600 dark:text-red-400" role="alert">That email and password
+        don’t match. Check both and try again.</p>
+      <button type="submit"
+        class="w-full rounded-lg bg-teal-700 hover:bg-teal-800 text-white font-semibold py-2.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 dark:focus:ring-offset-slate-800">Sign
+        in</button>
+      <p class="text-xs text-slate-500 dark:text-slate-400">Practice only. Try <code>maria@store.com</code> /
+        <code>sales123</code>.</p>
+    </form>
+  </main>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="dashboard-view" class="hidden max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+    <header class="flex items-center justify-between mb-6">
+      <h1 class="text-xl sm:text-2xl font-bold text-teal-700 dark:text-teal-300">Store Sales</h1>
+      <button id="logout"
+        class="text-sm rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">Sign
+        out</button>
+    </header>
+
+    <!-- Stats -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6" aria-label="Summary">
+      <div class="rounded-xl bg-teal-700 text-white p-5">
+        <p class="text-sm text-teal-100">Total revenue</p>
+        <p id="stat-revenue" class="text-3xl font-bold mt-1">$0</p>
+        <p class="text-xs text-teal-100 mt-1">Cancelled orders not counted</p>
+      </div>
+      <div class="rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5">
+        <p class="text-sm text-slate-500 dark:text-slate-400">Pending orders</p>
+        <p id="stat-pending" class="text-3xl font-bold mt-1">0</p>
+      </div>
+      <div class="rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5">
+        <p class="text-sm text-slate-500 dark:text-slate-400">Average order value</p>
+        <p id="stat-avg" class="text-3xl font-bold mt-1">$0</p>
+      </div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Orders -->
+      <section
+        class="lg:col-span-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 sm:p-5"
+        aria-label="Orders">
+        <div class="flex flex-col md:flex-row md:items-center gap-3 mb-4">
+          <input id="search" type="search" placeholder="Search by product" aria-label="Search by product"
+            class="flex-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <select id="status-filter" aria-label="Filter by status"
+            class="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+            <option value="All">All statuses</option>
+            <option>Pending</option>
+            <option>Shipped</option>
+            <option>Delivered</option>
+            <option>Cancelled</option>
+          </select>
+          <label class="inline-flex items-center gap-2 text-sm cursor-pointer select-none">
+            <input id="oos-toggle" type="checkbox" class="h-4 w-4 accent-teal-700">
+            Out of stock only
+          </label>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="py-2 pr-3 font-medium">Product</th>
+                <th class="py-2 pr-3 font-medium text-right">Price</th>
+                <th class="py-2 pr-3 font-medium text-right">Qty</th>
+                <th class="py-2 pr-3 font-medium text-right">Total</th>
+                <th class="py-2 pr-3 font-medium">Status</th>
+                <th class="py-2 font-medium">Stock</th>
+              </tr>
+            </thead>
+            <tbody id="orders-body" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
+          </table>
+        </div>
+        <p id="empty" class="hidden text-center text-slate-500 dark:text-slate-400 py-8">No orders match. Clear the
+          search or change a filter.</p>
+        <p id="count" class="text-xs text-slate-500 dark:text-slate-400 mt-3"></p>
+      </section>
+
+      <!-- Add order -->
+      <section
+        class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 sm:p-5 h-fit"
+        aria-label="Add order">
+        <h2 class="text-lg font-semibold mb-3">Add an order</h2>
+        <form id="order-form" class="space-y-3" novalidate>
+          <div>
+            <label for="f-product" class="block text-sm font-medium mb-1">Product</label>
+            <input id="f-product" type="text"
+              class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="f-price" class="block text-sm font-medium mb-1">Unit price ($)</label>
+              <input id="f-price" type="number" min="0" step="0.01"
+                class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+            </div>
+            <div>
+              <label for="f-qty" class="block text-sm font-medium mb-1">Quantity</label>
+              <input id="f-qty" type="number" min="1" step="1"
+                class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+            </div>
+          </div>
+          <p id="form-error" class="hidden text-sm text-red-600 dark:text-red-400" role="alert">Enter a product name, a
+            price of 0 or more, and a whole quantity of 1 or more.</p>
+          <button type="submit"
+            class="w-full rounded-lg bg-teal-700 hover:bg-teal-800 text-white font-semibold py-2.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 dark:focus:ring-offset-slate-800">Add
+            order</button>
+          <p class="text-xs text-slate-500 dark:text-slate-400">New orders start as Pending and in stock. Refreshing
+            resets the list.</p>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // ---- Single source of truth: orders ----
+    const orders = [
+      { product: 'Laptop', price: 1200, quantity: 2, status: 'Delivered', inStock: true },
+      { product: 'Desk Chair', price: 180, quantity: 4, status: 'Pending', inStock: true },
+      { product: 'Monitor', price: 320, quantity: 3, status: 'Shipped', inStock: true },
+      { product: 'Mechanical Keyboard', price: 95, quantity: 6, status: 'Delivered', inStock: true },
+      { product: 'Standing Desk', price: 540, quantity: 1, status: 'Pending', inStock: false },
+      { product: 'Webcam', price: 70, quantity: 5, status: 'Cancelled', inStock: true },
+      { product: 'USB-C Dock', price: 130, quantity: 3, status: 'Shipped', inStock: true },
+      { product: 'Wireless Mouse', price: 45, quantity: 10, status: 'Delivered', inStock: true },
+      { product: 'Desk Lamp', price: 38, quantity: 8, status: 'Pending', inStock: true },
+      { product: 'Headphones', price: 210, quantity: 2, status: 'Shipped', inStock: false },
+      { product: 'Monitor Arm', price: 85, quantity: 4, status: 'Cancelled', inStock: true },
+      { product: 'Tablet', price: 450, quantity: 2, status: 'Pending', inStock: true },
+      { product: 'Printer', price: 260, quantity: 1, status: 'Delivered', inStock: false },
+      { product: 'Office Chair Mat', price: 55, quantity: 3, status: 'Shipped', inStock: true }
+    ];
+
+    // ---- Separate login array (practice only) ----
+    const users = [
+      { email: 'maria@store.com', password: 'sales123' },
+      { email: 'sam@store.com', password: 'shop456' },
+      { email: 'ana@store.com', password: 'order789' }
+    ];
+
+    const $ = id => document.getElementById(id);
+    const money = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const badge = {
+      Pending: 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200',
+      Shipped: 'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-200',
+      Delivered: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200',
+      Cancelled: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+    };
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    // ---- Stats: computed with reduce over the whole array ----
+    function renderStats() {
+      const active = orders.filter(o => o.status !== 'Cancelled');
+      const revenue = active.reduce((sum, o) => sum + o.price * o.quantity, 0);
+      const pending = orders.reduce((n, o) => n + (o.status === 'Pending' ? 1 : 0), 0);
+      const avg = active.length ? revenue / active.length : 0;
+      $('stat-revenue').textContent = money(revenue);
+      $('stat-pending').textContent = pending;
+      $('stat-avg').textContent = money(avg);
+    }
+
+    // ---- List: status filter, out-of-stock toggle and search are separate conditions ----
+    function renderOrders() {
+      const status = $('status-filter').value;
+      const oosOnly = $('oos-toggle').checked;
+      const term = $('search').value.trim().toLowerCase();
+
+      const visible = orders
+        .filter(o => status === 'All' || o.status === status)
+        .filter(o => !oosOnly || o.inStock === false)
+        .filter(o => o.product.toLowerCase().includes(term));
+
+      $('orders-body').innerHTML = visible.map(o => `
+    <tr>
+      <td class="py-2.5 pr-3 font-medium">${esc(o.product)}</td>
+      <td class="py-2.5 pr-3 text-right">${money(o.price)}</td>
+      <td class="py-2.5 pr-3 text-right">${o.quantity}</td>
+      <td class="py-2.5 pr-3 text-right font-medium">${money(o.price * o.quantity)}</td>
+      <td class="py-2.5 pr-3"><span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${badge[o.status]}">${o.status}</span></td>
+      <td class="py-2.5 ${o.inStock ? 'text-slate-500 dark:text-slate-400' : 'text-red-600 dark:text-red-400 font-medium'}">${o.inStock ? 'In stock' : 'Out of stock'}</td>
+    </tr>`).join('');
+
+      $('empty').classList.toggle('hidden', visible.length > 0);
+      $('count').textContent = `Showing ${visible.length} of ${orders.length} orders`;
+    }
+
+    function render() { renderStats(); renderOrders(); }
+
+    // ---- Events ----
+    $('search').addEventListener('input', renderOrders);
+    $('status-filter').addEventListener('change', renderOrders);
+    $('oos-toggle').addEventListener('change', renderOrders);
+
+    $('order-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const product = $('f-product').value.trim();
+      const price = parseFloat($('f-price').value);
+      const quantity = parseInt($('f-qty').value, 10);
+      if (!product || isNaN(price) || price < 0 || isNaN(quantity) || quantity < 1) {
+        $('form-error').classList.remove('hidden');
+        return;
+      }
+      $('form-error').classList.add('hidden');
+      orders.push({ product, price, quantity, status: 'Pending', inStock: true });
+      e.target.reset();
+      render();
+    });
+
+    $('login-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const email = $('email').value.trim().toLowerCase();
+      const password = $('password').value;
+      const match = users.some(u => u.email === email && u.password === password);
+      if (!match) { $('login-error').classList.remove('hidden'); return; }
+      $('login-error').classList.add('hidden');
+      $('login-view').classList.add('hidden');
+      $('dashboard-view').classList.remove('hidden');
+      e.target.reset();
+      render();
+    });
+
+    $('logout').addEventListener('click', () => {
+      $('dashboard-view').classList.add('hidden');
+      $('login-view').classList.remove('hidden');
+    });
+  </script>
+</body>
+
+</html>

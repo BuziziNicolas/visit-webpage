@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>The Classroom Light Switches</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50 text-gray-900">
+    <div class="max-w-lg mx-auto mt-16 text-center px-4">
+        <h1 class="text-xl font-semibold mb-8">Flip a switch</h1>
+
+        <div class="header flex justify-center gap-4 mb-8">
+            <button id="btn1"
+                class="switch flex-1 border border-gray-200 rounded-xl py-5 px-2 bg-white hover:bg-gray-100 transition"
+                data-light="Window Light">
+                <span class="label block text-base mb-2">Window Light</span>
+                <span class="state block text-lg font-bold text-gray-400">OFF</span>
+            </button>
+            <button id="btn2"
+                class="switch flex-1 border border-gray-200 rounded-xl py-5 px-2 bg-white hover:bg-gray-100 transition"
+                data-light="Desk Light">
+                <span class="label block text-base mb-2">Desk Light</span>
+                <span class="state block text-lg font-bold text-gray-400">OFF</span>
+            </button>
+            <button id="btn3"
+                class="switch flex-1 border border-gray-200 rounded-xl py-5 px-2 bg-white hover:bg-gray-100 transition"
+                data-light="Hallway Light">
+                <span class="label block text-base mb-2">Hallway Light</span>
+                <span class="state block text-lg font-bold text-gray-400">OFF</span>
+            </button>
+        </div>
+
+        <p id="sign" class="text-lg text-gray-700">No lights on.</p>
+    </div>
+
+    <script>
+        const btnOne = document.querySelector("#btn1");
+        const btnTwo = document.querySelector("#btn2");
+        const btnThree = document.querySelector("#btn3");
+
+        const btnOneState = btnOne.querySelector(".state");
+        const btnOneLabel = btnOne.querySelector(".label");
+
+        const btnTwoState = btnTwo.querySelector(".state");
+
+        const btnThreeState = btnThree.querySelector(".state");
+
+        btnOne.addEventListener("click", function () {
+            const currentState = btnOneState.textContent;
+            btnOneState.innerHTML = currentState === "ON" ? "OFF" : "ON";
+
+            btnOneState.classList.toggle("text-yellow-500");
+        });
+
+        btnTwo.addEventListener("click", function () {
+            const stateExample = btnTwoState.textContent;
+
+            if (stateExample === "ON") {
+                btnTwoState.innerHTML = "OFF";
+            } else {
+                btnTwoState.innerHTML = "ON";
+            }
+
+            btnTwoState.classList.toggle("text-yellow-500");
+        });
+
+        btnThree.addEventListener("click", function () {
+            const stateExample = btnThreeState.textContent;
+
+            if (stateExample === "ON") {
+                btnThreeState.innerHTML = "OFF";
+            }
+            else {
+                btnThreeState.innerHTML = "ON";
+            }
+            btnThreeState.classList.toggle("text-yellow-500");
+        });
+
+    </script>
+</body>
+
+</html>
